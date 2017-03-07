@@ -5,8 +5,7 @@ from .plot_helpers import discrete_scatter
 from .plot_classifiers import plot_classifiers
 from .plot_2d_separator import plot_2d_classification, plot_2d_separator
 from .tools import heatmap
-from .datasets import make_forge
-from sklearn.datasets import make_blobs
+from .datasets import make_forge, make_blobs
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
@@ -20,6 +19,77 @@ from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import precision_recall_curve
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import roc_curve
+
+def plot_roc():
+    X, y = make_blobs(n_samples=(4000, 500), centers=2, cluster_std=[7.0, 2], random_state=22)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+    svc = SVC(gamma=.05).fit(X_train, y_train)
+    fpr, tpr, thresholds = roc_curve(y_test, svc.decision_function(X_test))
+
+    plt.plot(fpr, tpr, label="ROC Curve")
+    plt.xlabel("FPR")
+    plt.ylabel("TPR (recall)")
+    # find threshold closest to zero:
+    close_zero = np.argmin(np.abs(thresholds))
+    plt.plot(fpr[close_zero], tpr[close_zero], 'o', markersize=10,
+             label="threshold zero", fillstyle="none", c='k', mew=2)
+    plt.legend(loc=4);
+
+
+def plot_precision_recall_select():
+    X, y = make_blobs(n_samples=(4000, 500), centers=2, cluster_std=[7.0, 2],
+                  random_state=22)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+    svc = SVC(gamma=.05).fit(X_train, y_train)
+
+    precision, recall, thresholds = precision_recall_curve(
+        y_test, svc.decision_function(X_test))
+    close_zero = np.argmin(np.abs(thresholds))
+
+    rf = RandomForestClassifier(n_estimators=100, random_state=0, max_features=2)
+    rf.fit(X_train, y_train)
+
+    # RandomForestClassifier has predict_proba, but not decision_function
+    # Only pass probabilities for the positive class
+    precision_rf, recall_rf, thresholds_rf = precision_recall_curve(
+        y_test, rf.predict_proba(X_test)[:, 1])
+
+    plt.plot(recall, precision, label="svc")
+
+    plt.plot(recall[close_zero], precision[close_zero], 'o', markersize=10,
+             label="threshold zero svc", fillstyle="none", c='k', mew=2)
+
+    plt.plot(recall_rf, precision_rf, label="rf")
+
+    close_default_rf = np.argmin(np.abs(thresholds_rf - 0.5))
+    plt.plot( recall_rf[close_default_rf], precision_rf[close_default_rf], '^', c='k',
+             markersize=10, label="threshold 0.5 rf", fillstyle="none", mew=2)
+    plt.ylabel("Precision")
+    plt.xlabel("Recall")
+    plt.legend(loc="best");
+
+def plot_precision_recall_curve():
+    X, y = make_blobs(n_samples=(4000, 500), centers=2, cluster_std=[7.0, 2], random_state=22)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+    svc = SVC(gamma=.05).fit(X_train, y_train)
+
+    precision, recall, thresholds = precision_recall_curve(
+        y_test, svc.decision_function(X_test))
+    # find threshold closest to zero:
+    close_zero = np.argmin(np.abs(thresholds))
+    plt.plot(recall[close_zero], precision[close_zero], 'o', markersize=10,
+             label="threshold zero", fillstyle="none", c='k', mew=2)
+
+    plt.plot(recall, precision, label="precision recall curve")
+    plt.ylabel("Precision")
+    plt.xlabel("Recall")
+    plt.legend(loc="best")
 
 def plot_kNN_overfitting_curve(k = range(1, 11)):
     cancer = load_breast_cancer()
