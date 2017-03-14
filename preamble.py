@@ -9,6 +9,7 @@ import morelearn as ml
 import os
 from cycler import cycler
 from pprint import pprint
+import sklearn as sk
 
 set_matplotlib_formats('pdf', 'png')
 plt.rcParams['savefig.dpi'] = 300
