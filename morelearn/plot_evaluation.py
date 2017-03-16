@@ -1,11 +1,11 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from .plot_helpers import discrete_scatter
+from .plot_helpers import cm2, cm3, discrete_scatter
 from .plot_classifiers import plot_classifiers
 from .plot_2d_separator import plot_2d_classification, plot_2d_separator
 from .tools import heatmap
-from .datasets import make_forge, make_blobs
+from .datasets import make_forge, make_blobs, make_wave
 from sklearn.datasets import load_digits, load_iris, load_breast_cancer
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.pipeline import Pipeline
@@ -13,7 +13,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.model_selection import cross_val_score, GridSearchCV, train_test_split, ShuffleSplit
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.metrics import precision_recall_curve, roc_auc_score, roc_curve, accuracy_score, confusion_matrix
 from sklearn.ensemble import RandomForestClassifier
 
@@ -225,6 +225,32 @@ def plot_kNN_overfitting(k = [1, 3, 9]):
         ax.set_xlabel("feature 0")
         ax.set_ylabel("feature 1")
     _ = axes[0].legend(loc=3)
+
+def plot_kNN_regression(k = [1, 3, 9]):
+    X, y = make_wave(n_samples=40)
+
+    # split the wave dataset into a training and a test set
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+    # create 1000 data points, evenly spaced between -3 and 3
+    line = np.linspace(-3, 3, 1000).reshape(-1, 1)
+    for n_neighbors, ax in zip(k, axes):
+        # make predictions using 1, 3 or 9 neighbors
+        reg = KNeighborsRegressor(n_neighbors=n_neighbors)
+        reg.fit(X_train, y_train)
+        ax.plot(line, reg.predict(line))
+        ax.plot(X_train, y_train, '^', c=cm2(0), markersize=8)
+        ax.plot(X_test, y_test, 'v', c=cm2(1), markersize=8)
+
+        ax.set_title(
+            "{} neighbor(s)\n train score: {:.2f} test score: {:.2f}".format(
+                n_neighbors, reg.score(X_train, y_train),
+                reg.score(X_test, y_test)))
+        ax.set_xlabel("Feature")
+        ax.set_ylabel("Target")
+    _ = axes[0].legend(["Model predictions", "Training data/target",
+                    "Test data/target"], loc="best")
 
 def plot_grid_results(c = [0.001, 0.01, 0.1, 1, 10, 100], gamma = [0.001, 0.01, 0.1, 1, 10, 100] ):
     param_grid = {'C': c,
