@@ -29,20 +29,6 @@ def plot_neural_predictions(activation='tanh', hidden_layer_sizes=[10, 10]):
     plt.xlabel("Feature 0")
     plt.ylabel("Feature 1")
 
-def plot_neural_predictions(activation='tanh', hidden_layer_sizes=[10, 10]):
-    fig, axes = plt.subplots(2, 4, figsize=(20, 8))
-    for axx, n_hidden_nodes in zip(axes, [10, 100]):
-        for ax, alpha in zip(axx, [0.0001, 0.01, 0.1, 1]):
-            mlp = MLPClassifier(solver='lbfgs', random_state=0,
-                                hidden_layer_sizes=hidden_layer_sizes,
-
-                                alpha=alpha)
-            mlp.fit(X_train, y_train)
-            plots.plot_2d_separator(mlp, X_train, fill=True, alpha=.3, ax=ax)
-            discrete_scatter(X_train[:, 0], X_train[:, 1], y_train, ax=ax)
-            ax.set_title("n_hidden=[{}, {}]\nalpha={:.4f}".format(
-                          n_hidden_nodes, n_hidden_nodes, alpha))
-
 def contoursteps(x1, x2, zs, steps=None):
     fig = plt.figure(figsize=(6,6))
     cp = plt.contour(x1, x2, zs, 10)
