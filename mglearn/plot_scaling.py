@@ -22,7 +22,7 @@ def plot_scaling():
     other_axes = [plt.subplot2grid((2, 4), (i, j)) for j in range(2, 4) for i in range(2)]
 
     for ax, scaler in zip(other_axes, [StandardScaler(), RobustScaler(),
-                                       MinMaxScaler(), Normalizer(norm='l2')]):
+                                       MinMaxScaler()]):
         X_ = scaler.fit_transform(X)
         ax.scatter(X_[:, 0], X_[:, 1], c=y, cmap=cm2, s=60)
         ax.set_xlim(-2, 2)
